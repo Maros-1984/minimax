@@ -1,4 +1,4 @@
-package com.vranec;
+package com.vranec.minimax;
 
 /**
  * Hello world!
