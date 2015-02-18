@@ -1,19 +1,19 @@
 package com.vranec.minimax;
 
 public class BestMove {
-    private Move move;
+    private Board bestBoard;
     private int value;
 
     public BestMove(int boardValue) {
         this.value = boardValue;
     }
 
-    public Move getMove() {
-        return move;
+    public Board getBestBoard() {
+        return bestBoard;
     }
 
-    public void setMove(Move move) {
-        this.move = move;
+    public void setBestBoard(Board bestBoard) {
+        this.bestBoard = bestBoard;
     }
 
     public int getValue() {

@@ -1,15 +1,19 @@
 package com.vranec.minimax;
 
 public enum Color {
-    WHITE("BLACK"), BLACK("WHITE");
+    HUMAN("COMPUTER"), COMPUTER("HUMAN");
 
-    private final Color otherColor;
-    
+    private String otherColorName;
+    private Color otherColor;
+
     private Color(String otherColor) {
-        this.otherColor = Color.valueOf(otherColor);
+        this.otherColorName = otherColor;
     }
-    
+
     public Color getOtherColor() {
+        if (otherColor == null) {
+            otherColor = Color.valueOf(otherColorName);
+        }
         return otherColor;
     }
 }

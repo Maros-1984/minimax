@@ -5,9 +5,5 @@ public interface Board {
 
     public int getBoardValue(Color color);
 
-    public Iterable<Move> getNextMoves(Color color);
-
-    void perform(Move move);
-
-    void undo(Move move);
+    public Iterable<Board> getNextBoards(Color color);
 }
