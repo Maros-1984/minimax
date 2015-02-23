@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class ArtificialIntelligence {
-    private Cache<Object, TranspositionTableEntry> transpositionTable = CacheBuilder.newBuilder().maximumSize(1000000)
+    private Cache<Board, TranspositionTableEntry> transpositionTable = CacheBuilder.newBuilder().maximumSize(1000000)
             .recordStats().build();
 
     public BestMove getBestMove(Board board, int depth, Color color) {
