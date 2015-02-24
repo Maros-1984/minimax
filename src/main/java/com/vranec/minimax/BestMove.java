@@ -1,6 +1,6 @@
 package com.vranec.minimax;
 
-public class BestMove {
+public class BestMove implements Comparable<BestMove> {
     private Board bestBoard;
     private int value;
 
@@ -22,5 +22,9 @@ public class BestMove {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public int compareTo(BestMove o) {
+        return o.value - value;
     }
 }

@@ -2,7 +2,6 @@ package com.vranec.minimax;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.common.cache.Cache;
@@ -11,6 +10,26 @@ import com.google.common.cache.CacheBuilder;
 public class ArtificialIntelligence {
     private Cache<Board, TranspositionTableEntry> transpositionTable = CacheBuilder.newBuilder().maximumSize(1000000)
             .recordStats().build();
+
+    public BestMove getBestMoveIterativeDeepening(Board board, int depth, Color color) {
+        List<BestMove> bestMoves = new ArrayList<BestMove>();
+        for (Board nextBoard : board.getNextBoards(color)) {
+            BestMove move = new BestMove(0);
+            move.setBestBoard(nextBoard);
+            bestMoves.add(move);
+        }
+
+        for (int currentDepth = 1; currentDepth < depth; currentDepth++) {
+            for (BestMove move : bestMoves) {
+                BestMove bestMove = getBestMove(move.getBestBoard(), currentDepth, color.getOtherColor());
+                move.setValue(-bestMove.getValue());
+            }
+            Collections.sort(bestMoves);
+            
+        }
+        System.out.println(transpositionTable.stats());
+        return bestMoves.get(0);
+    }
 
     public BestMove getBestMove(Board board, int depth, Color color) {
         BestMove alphaBeta = null;
@@ -57,25 +76,6 @@ public class ArtificialIntelligence {
         }
 
         BestMove bestMove = new BestMove(-Integer.MAX_VALUE);
-        List<Board> possibleMoves = new ArrayList<Board>();
-        for (Board nextBoard : board.getNextBoards(color)) {
-            possibleMoves.add(nextBoard);
-        }
-        Collections.sort(possibleMoves, new Comparator<Board>() {
-            public int compare(Board o1, Board o2) {
-                Integer o1value = Integer.MIN_VALUE, o2value = Integer.MIN_VALUE;
-                TranspositionTableEntry o1tt = transpositionTable.getIfPresent(o1);
-                if (o1tt != null) {
-                    o1value = o1tt.getBestMove().getValue();
-                }
-                TranspositionTableEntry o2tt = transpositionTable.getIfPresent(o2);
-                if (o2tt != null) {
-                    o2value = o2tt.getBestMove().getValue();
-                }
-
-                return Integer.compare(o1value, o2value);
-            }
-        });
         for (Board nextBoard : board.getNextBoards(color)) {
             BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor());
             int val = -nextBestMove.getValue();
