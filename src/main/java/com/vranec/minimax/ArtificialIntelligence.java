@@ -19,24 +19,20 @@ public class ArtificialIntelligence {
             bestMoves.add(move);
         }
 
-        for (int currentDepth = 1; currentDepth < depth; currentDepth++) {
+        for (int currentDepth = 0; currentDepth < depth; currentDepth++) {
             for (BestMove move : bestMoves) {
                 BestMove bestMove = getBestMove(move.getBestBoard(), currentDepth, color.getOtherColor());
                 move.setValue(-bestMove.getValue());
             }
             Collections.sort(bestMoves);
-            
+
         }
         System.out.println(transpositionTable.stats());
         return bestMoves.get(0);
     }
 
     public BestMove getBestMove(Board board, int depth, Color color) {
-        BestMove alphaBeta = null;
-        for (int i = 1; i <= depth; i++) {
-            alphaBeta = alphaBeta(board, i, -Integer.MAX_VALUE, Integer.MAX_VALUE, color);
-        }
-        System.out.println(transpositionTable.stats());
+        BestMove alphaBeta = alphaBeta(board, depth, -Integer.MAX_VALUE, Integer.MAX_VALUE, color);
         return alphaBeta;
     }
 
@@ -80,7 +76,6 @@ public class ArtificialIntelligence {
             BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor());
             int val = -nextBestMove.getValue();
             if (val > bestMove.getValue()) {
-                bestMove = nextBestMove;
                 bestMove.setValue(val);
                 bestMove.setBestBoard(nextBoard);
                 alpha = Math.max(alpha, val);
