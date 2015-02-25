@@ -71,6 +71,13 @@ public class ArtificialIntelligence {
             return new BestMove(board.getBoardValue(color));
         }
 
+        if (isNullHeuristicOn() && depth >= 3) {
+            int value = -alphaBeta(board, depth - 1 - 2, -beta, -beta + 1, color.getOtherColor()).getValue();
+            if (value >= beta) {
+                return new BestMove(value);
+            }
+        }
+
         BestMove bestMove = new BestMove(-Integer.MAX_VALUE);
         for (Board nextBoard : board.getNextBoards(color)) {
             BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor());
@@ -89,5 +96,9 @@ public class ArtificialIntelligence {
         transpositionTable.put(board, new TranspositionTableEntry(bestMove, originalAlpha, beta, depth));
 
         return bestMove;
+    }
+
+    private boolean isNullHeuristicOn() {
+        return true;
     }
 }
