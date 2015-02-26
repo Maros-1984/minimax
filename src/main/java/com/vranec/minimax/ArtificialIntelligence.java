@@ -1,6 +1,5 @@
 package com.vranec.minimax;
 
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +18,8 @@ public class ArtificialIntelligence {
     public BestMove getBestMoveTimedIterativeDeepeningTimed(Board board, int depth, Color color, long timeToStop) {
         List<BestMove> bestMoves = new ArrayList<BestMove>();
         BestMove lastKnownBestMove = null;
-        for (Board nextBoard : board.getNextBoards(color)) {
+        for (Move nextMove : board.getNextBoards(color)) {
+            Board nextBoard = board.apply(nextMove);
             BestMove move = new BestMove(0);
             move.setBestBoard(nextBoard);
             bestMoves.add(move);
@@ -96,7 +96,8 @@ public class ArtificialIntelligence {
         }
 
         BestMove bestMove = new BestMove(-Integer.MAX_VALUE);
-        for (Board nextBoard : board.getNextBoards(color)) {
+        for (Move nextMove : board.getNextBoards(color)) {
+            Board nextBoard = board.apply(nextMove);
             BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor(), timeToStop);
             int val = -nextBestMove.getValue();
             if (val > bestMove.getValue()) {
@@ -104,6 +105,7 @@ public class ArtificialIntelligence {
                 bestMove.setBestBoard(nextBoard);
                 alpha = Math.max(alpha, val);
             }
+            nextBoard.undo(nextMove);
             if (alpha >= beta) {
                 break;
             }

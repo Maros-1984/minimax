@@ -3,7 +3,11 @@ package com.vranec.minimax;
 public interface Board {
     boolean isGameOver();
 
-    public int getBoardValue(Color color);
+    int getBoardValue(Color color);
 
-    public Iterable<Board> getNextBoards(Color color);
+    Iterable<Move> getNextBoards(Color color);
+
+    Board apply(Move move);
+
+    void undo(Move move);
 }
