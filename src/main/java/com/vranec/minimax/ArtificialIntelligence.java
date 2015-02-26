@@ -64,20 +64,22 @@ public class ArtificialIntelligence {
     public BestMove alphaBeta(Board board, int depth, int alpha, int beta, Color color, long timeToStop) {
         int originalAlpha = alpha;
 
-        // Check the transposition table.
-        TranspositionTableEntry ttEntry = (TranspositionTableEntry) transpositionTable.getIfPresent(board);
-        if (ttEntry != null && ttEntry.getDepth() >= depth) {
-            switch (ttEntry.getType()) {
-            case EXACT:
-                return ttEntry.getBestMove();
-            case LOWERBOUND:
-                alpha = Math.max(alpha, ttEntry.getBestMove().getValue());
-                break;
-            case UPPERBOUND:
-                beta = Math.min(beta, ttEntry.getBestMove().getValue());
-            }
-            if (alpha >= beta) {
-                return ttEntry.getBestMove();
+        if (isTranspositionTableUsed()) {
+            // Check the transposition table.
+            TranspositionTableEntry ttEntry = (TranspositionTableEntry) transpositionTable.getIfPresent(board);
+            if (ttEntry != null && ttEntry.getDepth() >= depth) {
+                switch (ttEntry.getType()) {
+                case EXACT:
+                    return ttEntry.getBestMove();
+                case LOWERBOUND:
+                    alpha = Math.max(alpha, ttEntry.getBestMove().getValue());
+                    break;
+                case UPPERBOUND:
+                    beta = Math.min(beta, ttEntry.getBestMove().getValue());
+                }
+                if (alpha >= beta) {
+                    return ttEntry.getBestMove();
+                }
             }
         }
 
@@ -107,13 +109,19 @@ public class ArtificialIntelligence {
             }
         }
 
-        // Store the best move into the transposition table.
-        transpositionTable.put(board, new TranspositionTableEntry(bestMove, originalAlpha, beta, depth));
+        if (isTranspositionTableUsed()) {
+            // Store the best move into the transposition table.
+            transpositionTable.put(board, new TranspositionTableEntry(bestMove, originalAlpha, beta, depth));
+        }
 
         return bestMove;
     }
 
     private boolean isNullHeuristicOn() {
         return true;
+    }
+
+    private boolean isTranspositionTableUsed() {
+        return false;
     }
 }
