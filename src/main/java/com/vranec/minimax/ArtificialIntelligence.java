@@ -1,5 +1,6 @@
 package com.vranec.minimax;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,27 +13,41 @@ public class ArtificialIntelligence {
             .recordStats().build();
 
     public BestMove getBestMoveIterativeDeepening(Board board, int depth, Color color) {
+        return getBestMoveTimedIterativeDeepeningTimed(board, depth, color, Long.MAX_VALUE);
+    }
+
+    public BestMove getBestMoveTimedIterativeDeepeningTimed(Board board, int depth, Color color, long timeToStop) {
         List<BestMove> bestMoves = new ArrayList<BestMove>();
+        BestMove lastKnownBestMove = null;
         for (Board nextBoard : board.getNextBoards(color)) {
             BestMove move = new BestMove(0);
             move.setBestBoard(nextBoard);
             bestMoves.add(move);
         }
 
-        for (int currentDepth = 0; currentDepth < depth; currentDepth++) {
+        int currentDepth = 0;
+        for (; currentDepth < depth; currentDepth++) {
             for (BestMove move : bestMoves) {
-                BestMove bestMove = getBestMove(move.getBestBoard(), currentDepth, color.getOtherColor());
+                BestMove bestMove = getBestMove(move.getBestBoard(), currentDepth, color.getOtherColor(), timeToStop);
                 move.setValue(-bestMove.getValue());
             }
             Collections.sort(bestMoves);
-
+            if (System.currentTimeMillis() > timeToStop) {
+                break;
+            }
+            lastKnownBestMove = bestMoves.get(0);
+            if (lastKnownBestMove.getValue() == Integer.MAX_VALUE) {
+                return lastKnownBestMove;
+            }
         }
         System.out.println(transpositionTable.stats());
-        return bestMoves.get(0);
+        System.out.println("Depth searched: " + currentDepth);
+
+        return lastKnownBestMove;
     }
 
-    public BestMove getBestMove(Board board, int depth, Color color) {
-        BestMove alphaBeta = alphaBeta(board, depth, -Integer.MAX_VALUE, Integer.MAX_VALUE, color);
+    public BestMove getBestMove(Board board, int depth, Color color, long timeToStop) {
+        BestMove alphaBeta = alphaBeta(board, depth, -Integer.MAX_VALUE, Integer.MAX_VALUE, color, timeToStop);
         return alphaBeta;
     }
 
@@ -46,7 +61,7 @@ public class ArtificialIntelligence {
      *            Who is on the move.
      * @return
      */
-    public BestMove alphaBeta(Board board, int depth, int alpha, int beta, Color color) {
+    public BestMove alphaBeta(Board board, int depth, int alpha, int beta, Color color, long timeToStop) {
         int originalAlpha = alpha;
 
         // Check the transposition table.
@@ -67,12 +82,12 @@ public class ArtificialIntelligence {
         }
 
         // Do the computation the hard way.
-        if (depth == 0 || board.isGameOver()) {
+        if (depth == 0 || System.currentTimeMillis() > timeToStop || board.isGameOver()) {
             return new BestMove(board.getBoardValue(color));
         }
 
         if (isNullHeuristicOn() && depth >= 3) {
-            int value = -alphaBeta(board, depth - 1 - 2, -beta, -beta + 1, color.getOtherColor()).getValue();
+            int value = -alphaBeta(board, depth - 1 - 2, -beta, -beta + 1, color.getOtherColor(), timeToStop).getValue();
             if (value >= beta) {
                 return new BestMove(value);
             }
@@ -80,7 +95,7 @@ public class ArtificialIntelligence {
 
         BestMove bestMove = new BestMove(-Integer.MAX_VALUE);
         for (Board nextBoard : board.getNextBoards(color)) {
-            BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor());
+            BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor(), timeToStop);
             int val = -nextBestMove.getValue();
             if (val > bestMove.getValue()) {
                 bestMove.setValue(val);

@@ -25,6 +25,9 @@ public class BestMove implements Comparable<BestMove> {
     }
 
     public int compareTo(BestMove o) {
-        return o.value - value;
+        if (o.value == value) {
+            return 0;
+        }
+        return o.value > value ? 1 : -1;
     }
 }
