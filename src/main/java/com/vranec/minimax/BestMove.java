@@ -1,19 +1,23 @@
 package com.vranec.minimax;
 
 public class BestMove implements Comparable<BestMove> {
-    private Board bestBoard;
+    private Move move;
     private int value;
 
     public BestMove(int boardValue) {
         this.value = boardValue;
     }
 
-    public Board getBestBoard() {
-        return bestBoard;
+    public BestMove(Move move2) {
+        this.move = move2;
     }
 
-    public void setBestBoard(Board bestBoard) {
-        this.bestBoard = bestBoard;
+    public Move getMove() {
+        return move;
+    }
+
+    public void setMove(Move move) {
+        this.move = move;
     }
 
     public int getValue() {
@@ -29,5 +33,10 @@ public class BestMove implements Comparable<BestMove> {
             return 0;
         }
         return o.value > value ? 1 : -1;
+    }
+
+    @Override
+    public String toString() {
+        return "" + move + ", val=" + value;
     }
 }
