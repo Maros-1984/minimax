@@ -1,22 +1,22 @@
 package com.vranec.minimax;
 
-public class BestMove implements Comparable<BestMove> {
-    private Move move;
+public class BestMove<MoveType extends Move> implements Comparable<BestMove<MoveType>> {
+    private MoveType move;
     private int value;
 
     public BestMove(int boardValue) {
         this.value = boardValue;
     }
 
-    public BestMove(Move move2) {
+    public BestMove(MoveType move2) {
         this.move = move2;
     }
 
-    public Move getMove() {
+    public MoveType getMove() {
         return move;
     }
 
-    public void setMove(Move move) {
+    public void setMove(MoveType move) {
         this.move = move;
     }
 
@@ -28,7 +28,7 @@ public class BestMove implements Comparable<BestMove> {
         this.value = value;
     }
 
-    public int compareTo(BestMove o) {
+    public int compareTo(BestMove<MoveType> o) {
         if (o.value == value) {
             return 0;
         }

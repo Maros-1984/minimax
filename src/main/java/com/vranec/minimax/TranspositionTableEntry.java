@@ -1,11 +1,11 @@
 package com.vranec.minimax;
 
-public class TranspositionTableEntry {
+public class TranspositionTableEntry<MoveType extends Move> {
     private final TranspositionTableEntryType type;
-    private final BestMove bestMove;
+    private final BestMove<MoveType> bestMove;
     private final int depth;
 
-    public TranspositionTableEntry(BestMove bestMove2, int originalAlpha, int beta, int depth2) {
+    public TranspositionTableEntry(BestMove<MoveType> bestMove2, int originalAlpha, int beta, int depth2) {
         this.bestMove = bestMove2;
         if (bestMove.getValue() <= originalAlpha) {
             type = TranspositionTableEntryType.UPPERBOUND;
@@ -17,7 +17,7 @@ public class TranspositionTableEntry {
         this.depth = depth2;
     }
 
-    public BestMove getBestMove() {
+    public BestMove<MoveType> getBestMove() {
         return bestMove;
     }
 

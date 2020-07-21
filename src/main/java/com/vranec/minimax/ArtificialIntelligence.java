@@ -1,31 +1,32 @@
 package com.vranec.minimax;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-public class ArtificialIntelligence {
-    private Cache<Integer, TranspositionTableEntry> transpositionTable = CacheBuilder.newBuilder().maximumSize(1000000)
+public class ArtificialIntelligence<MoveType extends Move> {
+    private final Cache<Long, TranspositionTableEntry<MoveType>> transpositionTable =
+            CacheBuilder.newBuilder().maximumSize(1000000)
             .recordStats().build();
 
-    public BestMove getBestMoveIterativeDeepening(Board board, int depth, Color color) {
+    public BestMove<MoveType> getBestMoveIterativeDeepening(Board<MoveType> board, int depth, Color color) {
         return getBestMoveTimedIterativeDeepeningTimed(board, depth, color, Long.MAX_VALUE);
     }
 
-    public BestMove getBestMoveTimedIterativeDeepeningTimed(Board board, int depth, Color color, long timeToStop) {
-        List<BestMove> bestMoves = new ArrayList<BestMove>();
-        BestMove lastKnownBestMove = null;
-        for (Move move : board.getNextBoards(color)) {
-            bestMoves.add(new BestMove(move));
+    public BestMove<MoveType> getBestMoveTimedIterativeDeepeningTimed(Board<MoveType> board, int depth, Color color, long timeToStop) {
+        List<BestMove<MoveType>> bestMoves = new ArrayList<>();
+        BestMove<MoveType> lastKnownBestMove = null;
+        for (MoveType move : board.getNextBoards(color)) {
+            bestMoves.add(new BestMove<>(move));
         }
 
         int currentDepth = 0;
         for (; currentDepth < depth; currentDepth++) {
-            for (BestMove move : bestMoves) {
-                Board nextBoard = board.apply(move.getMove());
+            for (BestMove<MoveType> move : bestMoves) {
+                Board<MoveType> nextBoard = board.apply(move.getMove());
                 int value = -getBestMove(nextBoard, currentDepth, color.getOtherColor(), timeToStop).getValue();
                 move.setValue(value);
                 nextBoard.undo(move.getMove());
@@ -45,9 +46,8 @@ public class ArtificialIntelligence {
         return lastKnownBestMove;
     }
 
-    public BestMove getBestMove(Board board, int depth, Color color, long timeToStop) {
-        BestMove alphaBeta = alphaBeta(board, depth, -Integer.MAX_VALUE, Integer.MAX_VALUE, color, timeToStop);
-        return alphaBeta;
+    public BestMove<MoveType> getBestMove(Board<MoveType> board, int depth, Color color, long timeToStop) {
+        return alphaBeta(board, depth, -Integer.MAX_VALUE, Integer.MAX_VALUE, color, timeToStop);
     }
 
     /**
@@ -58,14 +58,13 @@ public class ArtificialIntelligence {
      *            Depth to search in.
      * @param color
      *            Who is on the move.
-     * @return
      */
-    public BestMove alphaBeta(Board board, int depth, int alpha, int beta, Color color, long timeToStop) {
+    public BestMove<MoveType> alphaBeta(Board<MoveType> board, int depth, int alpha, int beta, Color color, long timeToStop) {
         int originalAlpha = alpha;
 
         if (isTranspositionTableUsed()) {
             // Check the transposition table.
-            TranspositionTableEntry ttEntry = (TranspositionTableEntry) transpositionTable.getIfPresent(board.hashCode());
+            TranspositionTableEntry<MoveType> ttEntry = transpositionTable.getIfPresent(board.uniqueHashCode());
             if (ttEntry != null && ttEntry.getDepth() >= depth) {
                 switch (ttEntry.getType()) {
                 case EXACT:
@@ -84,20 +83,25 @@ public class ArtificialIntelligence {
 
         // Do the computation the hard way.
         if (depth == 0 || System.currentTimeMillis() > timeToStop || board.isGameOver()) {
-            return new BestMove(board.getBoardValue(color));
+            int boardValue = board.getBoardValue(color);
+            if(boardValue == Integer.MIN_VALUE) {
+                throw new IllegalStateException("Please use -Integer.MAX_VALUE for losing condition instead of" +
+                        " Integer.MIN_VALUE.");
+            }
+            return new BestMove<>(boardValue);
         }
 
         if (isNullHeuristicOn() && depth >= 3) {
             int value = -alphaBeta(board, depth - 1 - 2, -beta, -beta + 1, color.getOtherColor(), timeToStop).getValue();
             if (value >= beta) {
-                return new BestMove(value);
+                return new BestMove<>(value);
             }
         }
 
-        BestMove bestMove = new BestMove(-Integer.MAX_VALUE);
-        for (Move nextMove : board.getNextBoards(color)) {
-            Board nextBoard = board.apply(nextMove);
-            BestMove nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor(), timeToStop);
+        BestMove<MoveType> bestMove = new BestMove<>(-Integer.MAX_VALUE);
+        for (MoveType nextMove : board.getNextBoards(color)) {
+            Board<MoveType> nextBoard = board.apply(nextMove);
+            BestMove<MoveType> nextBestMove = alphaBeta(nextBoard, depth - 1, -beta, -alpha, color.getOtherColor(), timeToStop);
             int val = -nextBestMove.getValue();
             if (val > bestMove.getValue()) {
                 bestMove.setValue(val);
@@ -112,7 +116,7 @@ public class ArtificialIntelligence {
 
         if (isTranspositionTableUsed()) {
             // Store the best move into the transposition table.
-            transpositionTable.put(board.hashCode(), new TranspositionTableEntry(bestMove, originalAlpha, beta, depth));
+            transpositionTable.put(board.uniqueHashCode(), new TranspositionTableEntry<>(bestMove, originalAlpha, beta, depth));
         }
 
         return bestMove;
