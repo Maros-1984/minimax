@@ -8,13 +8,22 @@ public class TranspositionTableEntry<MoveType extends Move> {
     public TranspositionTableEntry(BestMove<MoveType> bestMove2, int originalAlpha, int beta, int depth2) {
         this.bestMove = bestMove2;
         if (bestMove.getValue() <= originalAlpha) {
-            type = TranspositionTableEntryType.UPPERBOUND;
-        } else if (bestMove.getValue() >= beta) {
             type = TranspositionTableEntryType.LOWERBOUND;
+        } else if (bestMove.getValue() >= beta) {
+            type = TranspositionTableEntryType.UPPERBOUND;
         } else {
             type = TranspositionTableEntryType.EXACT;
         }
         this.depth = depth2;
+    }
+
+    @Override
+    public String toString() {
+        return "TranspositionTableEntry{" +
+                "type=" + type +
+                ", bestMove=" + bestMove +
+                ", depth=" + depth +
+                '}';
     }
 
     public BestMove<MoveType> getBestMove() {

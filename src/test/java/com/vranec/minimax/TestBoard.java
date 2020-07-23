@@ -1,6 +1,9 @@
 package com.vranec.minimax;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestBoard implements Board<TestMove> {
     private int counter;
@@ -21,11 +24,13 @@ public class TestBoard implements Board<TestMove> {
         } else if (counter <= 0) {
             return Integer.MAX_VALUE;
         }
-        return 0;
+        return 100 - counter;
     }
 
     public Iterable<TestMove> getNextBoards(Color color) {
-        return Arrays.asList(TestMove.ONE, TestMove.TWO, TestMove.THREE);
+        return Stream.of(TestMove.THREE, TestMove.TWO, TestMove.ONE)
+                .filter(tm->tm.getValue() <= counter)
+                .collect(Collectors.toList());
     }
 
     public Board<TestMove> apply(TestMove move) {
@@ -40,8 +45,18 @@ public class TestBoard implements Board<TestMove> {
     }
 
     @Override
-    public long uniqueHashCode() {
+    public Object getTranspositionTableKey() {
         return counter;
+    }
+
+    @Override
+    public boolean isTranspositionTableUsed() {
+        return true;
+    }
+
+    @Override
+    public boolean isNullHeuristicOn() {
+        return false;
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ArtificialIntelligence<MoveType extends Move> {
-    private final Cache<Long, TranspositionTableEntry<MoveType>> transpositionTable =
+    private final Cache<Object, TranspositionTableEntry<MoveType>> transpositionTable =
             CacheBuilder.newBuilder().maximumSize(1000000)
             .recordStats().build();
 
@@ -42,6 +42,7 @@ public class ArtificialIntelligence<MoveType extends Move> {
         }
         System.out.println(transpositionTable.stats());
         System.out.println("Depth searched: " + currentDepth);
+        System.out.println("Last known best move value: " + lastKnownBestMove.getValue());
 
         return lastKnownBestMove;
     }
@@ -62,9 +63,9 @@ public class ArtificialIntelligence<MoveType extends Move> {
     public BestMove<MoveType> alphaBeta(Board<MoveType> board, int depth, int alpha, int beta, Color color, long timeToStop) {
         int originalAlpha = alpha;
 
-        if (isTranspositionTableUsed()) {
+        if (board.isTranspositionTableUsed()) {
             // Check the transposition table.
-            TranspositionTableEntry<MoveType> ttEntry = transpositionTable.getIfPresent(board.uniqueHashCode());
+            TranspositionTableEntry<MoveType> ttEntry = transpositionTable.getIfPresent(board.getTranspositionTableKey());
             if (ttEntry != null && ttEntry.getDepth() >= depth) {
                 switch (ttEntry.getType()) {
                 case EXACT:
@@ -91,7 +92,7 @@ public class ArtificialIntelligence<MoveType extends Move> {
             return new BestMove<>(boardValue);
         }
 
-        if (isNullHeuristicOn() && depth >= 3) {
+        if (board.isNullHeuristicOn() && depth >= 3) {
             int value = -alphaBeta(board, depth - 1 - 2, -beta, -beta + 1, color.getOtherColor(), timeToStop).getValue();
             if (value >= beta) {
                 return new BestMove<>(value);
@@ -114,19 +115,11 @@ public class ArtificialIntelligence<MoveType extends Move> {
             }
         }
 
-        if (isTranspositionTableUsed()) {
+        if (board.isTranspositionTableUsed()) {
             // Store the best move into the transposition table.
-            transpositionTable.put(board.uniqueHashCode(), new TranspositionTableEntry<>(bestMove, originalAlpha, beta, depth));
+            transpositionTable.put(board.getTranspositionTableKey(), new TranspositionTableEntry<>(bestMove, originalAlpha, beta, depth));
         }
 
         return bestMove;
-    }
-
-    private boolean isNullHeuristicOn() {
-        return true;
-    }
-
-    private boolean isTranspositionTableUsed() {
-        return true;
     }
 }

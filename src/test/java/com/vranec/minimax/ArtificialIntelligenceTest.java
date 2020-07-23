@@ -24,18 +24,18 @@ class ArtificialIntelligenceTest {
 
     @Test
     void getBestMove_givenFarBestMove_returnsIt() {
-        BestMove<TestMove> bestMove = new ArtificialIntelligence<TestMove>().getBestMoveTimedIterativeDeepeningTimed(
-                new TestBoard(100), Integer.MAX_VALUE, Color.COMPUTER, Long.MAX_VALUE);
+        BestMove<TestMove> bestMove = new ArtificialIntelligence<TestMove>().getBestMoveIterativeDeepening(
+                new TestBoard(17), Integer.MAX_VALUE, Color.COMPUTER);
 
-        assertEquals(2, bestMove.getMove().getValue());
+        assertEquals(1, bestMove.getMove().getValue());
         assertEquals(Integer.MAX_VALUE, bestMove.getValue());
     }
 
     @Test
     void getBestMove_givenTooShallowSearch_doesntReturnIt() {
         BestMove<TestMove> bestMove = new ArtificialIntelligence<TestMove>().getBestMoveTimedIterativeDeepeningTimed(
-                new TestBoard(100), 50, Color.COMPUTER, Long.MAX_VALUE);
+                new TestBoard(20), 8, Color.COMPUTER, Long.MAX_VALUE);
 
-        assertEquals(0, bestMove.getValue());
+        assertEquals(97, bestMove.getValue());
     }
 }

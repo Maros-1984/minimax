@@ -40,8 +40,18 @@ public interface Board<MoveType extends Move> {
     void undo(MoveType move);
 
     /**
-     * @return Unique hash code of the board. Can be a reasonable implementation similar to the hashCode implementation.
-     * Should be as unique as possible.
+     * @return Can be the board itself, as long as it is immutable or copied.
      */
-    long uniqueHashCode();
+    Object getTranspositionTableKey();
+
+    /**
+     * @return Whether the transposition table should be used at all. If false, you don't have to really implement the
+     * uniqueHashCode.
+     */
+    boolean isTranspositionTableUsed();
+
+    /**
+     * @return Whether the null heuristic should be applied.
+     */
+    boolean isNullHeuristicOn();
 }
