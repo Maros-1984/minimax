@@ -1,7 +1,8 @@
 package com.vranec.minimax;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public class ArtificialIntelligence<MoveType extends Move> {
     private final Cache<Object, TranspositionTableEntry<MoveType>> transpositionTable =
-            CacheBuilder.newBuilder().maximumSize(1000000)
+            Caffeine.newBuilder().maximumSize(1000000)
             .recordStats().build();
 
     public BestMove<MoveType> getBestMoveIterativeDeepening(Board<MoveType> board, int depth, Color color) {
