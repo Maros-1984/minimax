@@ -5,11 +5,11 @@ public class TranspositionTableEntry<MoveType extends Move> {
     private final BestMove<MoveType> bestMove;
     private final int depth;
 
-    public TranspositionTableEntry(BestMove<MoveType> bestMove2, int originalAlpha, int beta, int depth2) {
-        this.bestMove = bestMove2;
-        if (bestMove.getValue() <= originalAlpha) {
+    public TranspositionTableEntry(BestMove<MoveType> bestMove, int originalAlpha, int beta, int depth2) {
+        this.bestMove = bestMove;
+        if (this.bestMove.getValue() <= originalAlpha) {
             type = TranspositionTableEntryType.LOWERBOUND;
-        } else if (bestMove.getValue() >= beta) {
+        } else if (this.bestMove.getValue() >= beta) {
             type = TranspositionTableEntryType.UPPERBOUND;
         } else {
             type = TranspositionTableEntryType.EXACT;

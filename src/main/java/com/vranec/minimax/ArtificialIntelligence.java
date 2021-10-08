@@ -11,7 +11,7 @@ import java.util.List;
 public class ArtificialIntelligence<MoveType extends Move> {
     private final Cache<Object, TranspositionTableEntry<MoveType>> transpositionTable =
             Caffeine.newBuilder().maximumSize(1000000)
-            .recordStats().build();
+                    .recordStats().build();
 
     public BestMove<MoveType> getBestMoveIterativeDeepening(Board<MoveType> board, int depth, Color color) {
         return getBestMoveTimedIterativeDeepeningTimed(board, depth, color, Long.MAX_VALUE);
@@ -53,29 +53,26 @@ public class ArtificialIntelligence<MoveType extends Move> {
     }
 
     /**
-     * 
-     * @param board
-     *            Current board state.
-     * @param depth
-     *            Depth to search in.
-     * @param color
-     *            Who is on the move.
+     * @param board Current board state.
+     * @param depth Depth to search in.
+     * @param color Who is on the move.
      */
     public BestMove<MoveType> alphaBeta(Board<MoveType> board, int depth, int alpha, int beta, Color color, long timeToStop) {
         int originalAlpha = alpha;
 
         if (board.isTranspositionTableUsed()) {
             // Check the transposition table.
-            TranspositionTableEntry<MoveType> ttEntry = transpositionTable.getIfPresent(board.getTranspositionTableKey());
+            TranspositionTableEntry<MoveType> ttEntry = transpositionTable.getIfPresent(
+                    new TranspositionTableKey(color, board.getTranspositionTableKey()));
             if (ttEntry != null && ttEntry.getDepth() >= depth) {
                 switch (ttEntry.getType()) {
-                case EXACT:
-                    return ttEntry.getBestMove();
-                case LOWERBOUND:
-                    alpha = Math.max(alpha, ttEntry.getBestMove().getValue());
-                    break;
-                case UPPERBOUND:
-                    beta = Math.min(beta, ttEntry.getBestMove().getValue());
+                    case EXACT:
+                        return ttEntry.getBestMove();
+                    case LOWERBOUND:
+                        alpha = Math.max(alpha, ttEntry.getBestMove().getValue());
+                        break;
+                    case UPPERBOUND:
+                        beta = Math.min(beta, ttEntry.getBestMove().getValue());
                 }
                 if (alpha >= beta) {
                     return ttEntry.getBestMove();
@@ -86,7 +83,7 @@ public class ArtificialIntelligence<MoveType extends Move> {
         // Do the computation the hard way.
         if (depth == 0 || System.currentTimeMillis() > timeToStop || board.isGameOver()) {
             int boardValue = board.getBoardValue(color);
-            if(boardValue == Integer.MIN_VALUE) {
+            if (boardValue == Integer.MIN_VALUE) {
                 throw new IllegalStateException("Please use -Integer.MAX_VALUE for losing condition instead of" +
                         " Integer.MIN_VALUE.");
             }
@@ -118,7 +115,8 @@ public class ArtificialIntelligence<MoveType extends Move> {
 
         if (board.isTranspositionTableUsed()) {
             // Store the best move into the transposition table.
-            transpositionTable.put(board.getTranspositionTableKey(), new TranspositionTableEntry<>(bestMove, originalAlpha, beta, depth));
+            transpositionTable.put(new TranspositionTableKey(color, board.getTranspositionTableKey()),
+                    new TranspositionTableEntry<>(bestMove, originalAlpha, beta, depth));
         }
 
         return bestMove;

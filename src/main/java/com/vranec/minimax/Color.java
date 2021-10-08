@@ -3,10 +3,10 @@ package com.vranec.minimax;
 public enum Color {
     HUMAN("COMPUTER"), COMPUTER("HUMAN");
 
-    private String otherColorName;
+    private final String otherColorName;
     private Color otherColor;
 
-    private Color(String otherColor) {
+    Color(String otherColor) {
         this.otherColorName = otherColor;
     }
 
